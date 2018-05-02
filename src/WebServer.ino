@@ -1245,6 +1245,7 @@ void handle_controllers() {
   String controllersubscribe = WebServer.arg(F("controllersubscribe"));
   String controllerpublish = WebServer.arg(F("controllerpublish"));
   String controllerenabled = WebServer.arg(F("controllerenabled"));
+  String MQTTLwtTopic = WebServer.arg(F("mqttlwttopic"));
 
 
 
@@ -1268,8 +1269,10 @@ void handle_controllers() {
           CPlugin_ptr[ProtocolIndex](CPLUGIN_PROTOCOL_TEMPLATE, &TempEvent, dummyString);
         strncpy(ControllerSettings.Subscribe, TempEvent.String1.c_str(), sizeof(ControllerSettings.Subscribe));
         strncpy(ControllerSettings.Publish, TempEvent.String2.c_str(), sizeof(ControllerSettings.Publish));
+        strncpy(ControllerSettings.MQTTLwtTopic, TempEvent.String3.c_str(), sizeof(ControllerSettings.MQTTLwtTopic));
         TempEvent.String1 = "";
         TempEvent.String2 = "";
+        TempEvent.String3 = "";
         //NOTE: do not enable controller by default, give user a change to enter sensible values first
 
         //not resetted to default (for convenience)
@@ -1314,6 +1317,7 @@ void handle_controllers() {
         copyFormPassword(F("controllerpassword"), SecuritySettings.ControllerPassword[controllerindex], sizeof(SecuritySettings.ControllerPassword[0]));
         strncpy(ControllerSettings.Subscribe, controllersubscribe.c_str(), sizeof(ControllerSettings.Subscribe));
         strncpy(ControllerSettings.Publish, controllerpublish.c_str(), sizeof(ControllerSettings.Publish));
+        strncpy(ControllerSettings.MQTTLwtTopic, MQTTLwtTopic.c_str(), sizeof(ControllerSettings.MQTTLwtTopic));
         CPlugin_ptr[ProtocolIndex](CPLUGIN_INIT, &TempEvent, dummyString);
       }
     }
@@ -1434,8 +1438,7 @@ void handle_controllers() {
             protoDisplayName = F("Controller Subscribe");
           }
           addFormTextBox(protoDisplayName, F("controllersubscribe"), ControllerSettings.Subscribe, sizeof(ControllerSettings.Subscribe)-1);
-         }
-
+        }
         if (Protocol[ProtocolIndex].usesTemplate || Protocol[ProtocolIndex].usesMQTT)
         {
            String protoDisplayName;
@@ -1443,7 +1446,15 @@ void handle_controllers() {
             protoDisplayName = F("Controller Publish");
           }
           addFormTextBox(protoDisplayName, F("controllerpublish"), ControllerSettings.Publish, sizeof(ControllerSettings.Publish)-1);
-         }
+        }
+        if (Protocol[ProtocolIndex].usesMQTT)
+        {
+           String protoDisplayName;
+          if (!getControllerProtocolDisplayName(ProtocolIndex, CONTROLLER_LWT_TOPIC, protoDisplayName)) {
+            protoDisplayName = F("Controller lwl topic");
+          }
+          addFormTextBox(protoDisplayName, F("mqttlwttopic"), ControllerSettings.MQTTLwtTopic, sizeof(ControllerSettings.MQTTLwtTopic)-1);
+        }
 
       }
 
@@ -3779,7 +3790,7 @@ void handle_advanced() {
   TXBuffer.startStream();
   sendHeadandTail(F("TmplStd"));
 
-  char tmpString[81];
+  char tmpString[129];
 
   String messagedelay = WebServer.arg(F("messagedelay"));
   String ip = WebServer.arg(F("ip"));
@@ -3865,7 +3876,6 @@ void handle_advanced() {
   addFormCheckBox(F("MQTT Retain Msg"), F("mqttretainflag"), Settings.MQTTRetainFlag);
   addFormNumericBox( F("Message Interval"), F("messagedelay"), Settings.MessageDelay, 0, INT_MAX);
   addUnit(F("ms"));
-
   addFormSubHeader(F("NTP Settings"));
 
   addFormCheckBox(F("Use NTP"), F("usentp"), Settings.UseNTP);
