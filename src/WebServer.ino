@@ -3732,7 +3732,7 @@ void handle_advanced() {
   TXBuffer.startStream();
   sendHeadandTail(F("TmplStd"));
 
-  char tmpString[81];
+  char tmpString[129];
 
   String messagedelay = WebServer.arg(F("messagedelay"));
   String ip = WebServer.arg(F("ip"));
@@ -3766,6 +3766,7 @@ void handle_advanced() {
   String MQTTRetainFlag = WebServer.arg(F("mqttretainflag"));
   String ArduinoOTAEnable = WebServer.arg(F("arduinootaenable"));
   String UseRTOSMultitasking = WebServer.arg(F("usertosmultitasking"));
+  String MQTTLwtTopic = WebServer.arg(F("mqttlwttopic"));
 
 
   if (edit.length() != 0)
@@ -3799,6 +3800,9 @@ void handle_advanced() {
     Settings.MQTTRetainFlag = (MQTTRetainFlag == "on");
     Settings.ArduinoOTAEnable = (ArduinoOTAEnable == "on");
     Settings.UseRTOSMultitasking = (UseRTOSMultitasking == "on");
+    memset(tmpString, 0, sizeof(tmpString));
+    MQTTLwtTopic.toCharArray(tmpString, 129);
+    strcpy(Settings.MQTTLwtTopic, tmpString);
 
     addHtmlError(SaveSettings());
     if (Settings.UseNTP)
@@ -3818,7 +3822,7 @@ void handle_advanced() {
   addFormCheckBox(F("MQTT Retain Msg"), F("mqttretainflag"), Settings.MQTTRetainFlag);
   addFormNumericBox( F("Message Interval"), F("messagedelay"), Settings.MessageDelay, 0, INT_MAX);
   addUnit(F("ms"));
-
+  addFormTextBox( F("LWT Topic"), F("mqttlwttopic"), Settings.MQTTLwtTopic, 128);
   addFormSubHeader(F("NTP Settings"));
 
   addFormCheckBox(F("Use NTP"), F("usentp"), Settings.UseNTP);

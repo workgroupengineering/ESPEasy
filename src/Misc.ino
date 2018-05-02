@@ -495,6 +495,7 @@ String BuildFixes()
     Settings.UseRTOSMultitasking = false;
     Settings.Pin_Reset = -1;
     Settings.SyslogFacility = DEFAULT_SYSLOG_FACILITY;
+    strcpy_P(Settings.MQTTLwtTopic, PSTR(DEFAULT_MQTT_LWT_TOPIC));
     Settings.StructSize = sizeof(Settings);
   }
 
@@ -1196,6 +1197,7 @@ void ResetFactory(void)
 
 	Settings.MQTTRetainFlag	= DEFAULT_MQTT_RETAIN;
 	Settings.MessageDelay	= DEFAULT_MQTT_DELAY;
+	strcpy_P(Settings.MQTTLwtTopic, PSTR(DEFAULT_MQTT_LWT_TOPIC));
 
     Settings.UseNTP			= DEFAULT_USE_NTP;
 	strcpy_P(Settings.NTPHost, PSTR(DEFAULT_NTP_HOST));

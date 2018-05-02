@@ -74,6 +74,7 @@
 
 #define DEFAULT_MQTT_RETAIN                     false   // (true|false) Retain MQTT messages?
 #define DEFAULT_MQTT_DELAY                      1000    // Time in milliseconds to retain MQTT messages
+#define DEFAULT_MQTT_LWT_TOPIC                  ""      // Default lwt topic
 
 #define DEFAULT_USE_NTP                         false   // (true|false) Use NTP Server
 #define DEFAULT_NTP_HOST                        ""              // NTP Server Hostname
@@ -640,6 +641,7 @@ struct SettingsStruct
         TaskDeviceTimer[task] = 0;
         TaskDeviceEnabled[task] = false;
       }
+	  memset(MQTTLwtTopic, 0, sizeof(MQTTLwtTopic));
     }
 
   unsigned long PID;
@@ -718,6 +720,7 @@ struct SettingsStruct
   int8_t        Pin_Reset;
   byte          SyslogFacility;
   uint32_t      StructSize;  // Forced to be 32 bit, to make sure alignment is clear.
+  char          MQTTLwtTopic[129];
 
   //its safe to extend this struct, up to several bytes, default values in config are 0
   //look in misc.ino how config.dat is used because also other stuff is stored in it at different offsets.
