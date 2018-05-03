@@ -3780,6 +3780,7 @@ void handle_advanced() {
   String ArduinoOTAEnable = WebServer.arg(F("arduinootaenable"));
   String UseRTOSMultitasking = WebServer.arg(F("usertosmultitasking"));
   String MQTTLwtTopic = WebServer.arg(F("mqttlwttopic"));
+  String MQTTUseUnitNameAsClientId = WebServer.arg(F("mqrruseunitnameasclientid"));
 
 
   if (edit.length() != 0)
@@ -3816,6 +3817,7 @@ void handle_advanced() {
     memset(tmpString, 0, sizeof(tmpString));
     MQTTLwtTopic.toCharArray(tmpString, 129);
     strcpy(Settings.MQTTLwtTopic, tmpString);
+    Settings.MQTTUseUnitNameAsClientId = (MQTTUseUnitNameAsClientId == "on");
 
     addHtmlError(SaveSettings());
     if (Settings.UseNTP)
@@ -3836,6 +3838,8 @@ void handle_advanced() {
   addFormNumericBox( F("Message Interval"), F("messagedelay"), Settings.MessageDelay, 0, INT_MAX);
   addUnit(F("ms"));
   addFormTextBox( F("LWT Topic"), F("mqttlwttopic"), Settings.MQTTLwtTopic, 128);
+  addFormCheckBox(F("MQTT usege unit name as ClientId"), F("mqrruseunitnameasclientid"), Settings.MQTTUseUnitNameAsClientId);
+
   addFormSubHeader(F("NTP Settings"));
 
   addFormCheckBox(F("Use NTP"), F("usentp"), Settings.UseNTP);

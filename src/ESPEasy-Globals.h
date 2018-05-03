@@ -76,6 +76,7 @@
 #define DEFAULT_MQTT_DELAY                      1000    // Time in milliseconds to retain MQTT messages
 #define DEFAULT_MQTT_LWT_TOPIC                  ""      // Default lwt topic
 #define DEFAULT_MQTT_LWT_MESSAGE                "Connection Lost" // Default lwt message
+#define DEFAULT_MQTT_USE_UNITNANE_AS_CLIENTID   0
 
 #define DEFAULT_USE_NTP                         false   // (true|false) Use NTP Server
 #define DEFAULT_NTP_HOST                        ""              // NTP Server Hostname
@@ -613,7 +614,7 @@ struct SettingsStruct
     TimeZone(0), MQTTRetainFlag(false), InitSPI(false),
     Pin_status_led_Inversed(false), deepSleepOnFail(false), UseValueLogger(false),
     DST_Start(0), DST_End(0), UseRTOSMultitasking(false), Pin_Reset(-1),
-    SyslogFacility(DEFAULT_SYSLOG_FACILITY), StructSize(0)
+    SyslogFacility(DEFAULT_SYSLOG_FACILITY), StructSize(0), MQTTUseUnitNameAsClientId(0)
     {
       for (byte i = 0; i < CONTROLLER_MAX; ++i) {
         Protocol[i] = 0;
@@ -723,7 +724,7 @@ struct SettingsStruct
   byte          SyslogFacility;
   uint32_t      StructSize;  // Forced to be 32 bit, to make sure alignment is clear.
   char          MQTTLwtTopic[129];
-
+  boolean       MQTTUseUnitNameAsClientId;
   //its safe to extend this struct, up to several bytes, default values in config are 0
   //look in misc.ino how config.dat is used because also other stuff is stored in it at different offsets.
   //TODO: document config.dat somewhere here
