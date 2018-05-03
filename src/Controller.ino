@@ -147,15 +147,21 @@ bool MQTTConnect(int controller_idx)
   LWTTopic.replace(F("/#"), F("/status"));
   parseSystemVariables(LWTTopic, false);
 
+  String LWTMessage = ControllerSettings.LWTMessage;
+  if(LWTMessage.length() == 0){
+    LWTMessage = DEFAULT_MQTT_LWT_MESSAGE;
+  }
+  parseSystemVariables(LWTMessage, false);
+  
   boolean MQTTresult = false;
   uint8_t willQos = 0;
   boolean willRetain = true;
 
   if ((SecuritySettings.ControllerUser[controller_idx] != 0) && (SecuritySettings.ControllerPassword[controller_idx] != 0)) {
     MQTTresult = MQTTclient.connect(clientid.c_str(), SecuritySettings.ControllerUser[controller_idx], SecuritySettings.ControllerPassword[controller_idx],
-                                    LWTTopic.c_str(), willQos, willRetain, "Connection Lost");
+                                    LWTTopic.c_str(), willQos, willRetain, LWTMessage.c_str());
   } else {
-    MQTTresult = MQTTclient.connect(clientid.c_str(), LWTTopic.c_str(), willQos, willRetain, "Connection Lost");
+    MQTTresult = MQTTclient.connect(clientid.c_str(), LWTTopic.c_str(), willQos, willRetain, LWTMessage.c_str());
   }
   yield();
 

@@ -1245,6 +1245,7 @@ void handle_controllers() {
   String controllersubscribe = WebServer.arg(F("controllersubscribe"));
   String controllerpublish = WebServer.arg(F("controllerpublish"));
   String controllerenabled = WebServer.arg(F("controllerenabled"));
+  String lwtmessage = WebServer.arg(F("lwtmessage"));
 
 
 
@@ -1268,8 +1269,10 @@ void handle_controllers() {
           CPlugin_ptr[ProtocolIndex](CPLUGIN_PROTOCOL_TEMPLATE, &TempEvent, dummyString);
         strncpy(ControllerSettings.Subscribe, TempEvent.String1.c_str(), sizeof(ControllerSettings.Subscribe));
         strncpy(ControllerSettings.Publish, TempEvent.String2.c_str(), sizeof(ControllerSettings.Publish));
+		strncpy(ControllerSettings.LWTMessage, TempEvent.String3.c_str(), sizeof(ControllerSettings.LWTMessage));
         TempEvent.String1 = "";
         TempEvent.String2 = "";
+		TempEvent.String3 = "";
         //NOTE: do not enable controller by default, give user a change to enter sensible values first
 
         //not resetted to default (for convenience)
@@ -1314,6 +1317,7 @@ void handle_controllers() {
         copyFormPassword(F("controllerpassword"), SecuritySettings.ControllerPassword[controllerindex], sizeof(SecuritySettings.ControllerPassword[0]));
         strncpy(ControllerSettings.Subscribe, controllersubscribe.c_str(), sizeof(ControllerSettings.Subscribe));
         strncpy(ControllerSettings.Publish, controllerpublish.c_str(), sizeof(ControllerSettings.Publish));
+        strncpy(ControllerSettings.LWTMessage, lwtmessage.c_str(), sizeof(ControllerSettings.LWTMessage));
         CPlugin_ptr[ProtocolIndex](CPLUGIN_INIT, &TempEvent, dummyString);
       }
     }
@@ -1434,6 +1438,15 @@ void handle_controllers() {
             protoDisplayName = F("Controller Subscribe");
           }
           addFormTextBox(protoDisplayName, F("controllersubscribe"), ControllerSettings.Subscribe, sizeof(ControllerSettings.Subscribe)-1);
+         }
+
+        if (Protocol[ProtocolIndex].usesMQTT)
+        {
+           String protoDisplayName;
+          if (!getControllerProtocolDisplayName(ProtocolIndex, CONTROLLER_LWT_MESSAGE, protoDisplayName)) {
+            protoDisplayName = F("LWT Message");
+          }
+          addFormTextBox(protoDisplayName, F("lwtmessage"), ControllerSettings.LWTMessage, sizeof(ControllerSettings.LWTMessage)-1);
          }
 
         if (Protocol[ProtocolIndex].usesTemplate || Protocol[ProtocolIndex].usesMQTT)
