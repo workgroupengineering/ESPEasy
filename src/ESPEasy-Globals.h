@@ -646,7 +646,6 @@ struct SettingsStruct
         TaskDeviceTimer[task] = 0;
         TaskDeviceEnabled[task] = false;
       }
-	  memset(MQTTLwtTopic, 0, sizeof(MQTTLwtTopic));
     }
 
   unsigned long PID;
@@ -725,7 +724,6 @@ struct SettingsStruct
   int8_t        Pin_Reset;
   byte          SyslogFacility;
   uint32_t      StructSize;  // Forced to be 32 bit, to make sure alignment is clear.
-  char          MQTTLwtTopic[129];
 
   //its safe to extend this struct, up to several bytes, default values in config are 0
   //look in misc.ino how config.dat is used because also other stuff is stored in it at different offsets.

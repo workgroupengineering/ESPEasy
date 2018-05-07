@@ -3790,7 +3790,7 @@ void handle_advanced() {
   TXBuffer.startStream();
   sendHeadandTail(F("TmplStd"));
 
-  char tmpString[129];
+  char tmpString[81];
 
   String messagedelay = WebServer.arg(F("messagedelay"));
   String ip = WebServer.arg(F("ip"));
