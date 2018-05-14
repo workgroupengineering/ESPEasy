@@ -8,8 +8,11 @@ VERSION=$(git describe)
 
 for ENV in \
   normal_ESP8266_1024 \
-  test_ESP8266_1024\
-  dev_ESP8266_1024;\
+  normal_ESP8266_4096_VCC \
+  test_ESP8266_1024 \
+  test_ESP8266_4096_VCC\
+  dev_ESP8266_1024\
+  dev_ESP8266_4096_VCC;\
 do
   echo
   echo "### Deploying environment $ENV for version $VERSION"
