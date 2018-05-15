@@ -751,7 +751,22 @@ void SensorSendTask(byte TaskIndex)
 /*********************************************************************************************\
  * set global system timer
 \*********************************************************************************************/
-void setSystemTimer(unsigned long timer, byte plugin, byte Par1, byte Par2, byte Par3)
+void setSystemTimer(unsigned long timer, byte plugin, int Par1, int Par2, int Par3)
+{
+  setSystemTimer(timer, plugin, -1, Par1, Par2, Par3, 0, 0);
+}
+
+void setSystemTimer(unsigned long timer, byte plugin, short taskIndex, int Par1, int Par2, int Par3)
+{
+  setSystemTimer(timer, plugin, taskIndex , Par1, Par2, Par3, 0, 0);
+}
+
+void setSystemTimer(unsigned long timer, byte plugin, short taskIndex, int Par1, int Par2, int Par3, int Par4)
+{
+  setSystemTimer(timer, plugin, taskIndex , Par1, Par2, Par3, Par4, 0);
+}
+
+void setSystemTimer(unsigned long timer, byte plugin, short taskIndex, int Par1, int Par2, int Par3, int Par4, int Par5)
 {
   // plugin number and par1 form a unique key that can be used to restart a timer
   // first check if a timer is not already running for this request
@@ -761,7 +776,7 @@ void setSystemTimer(unsigned long timer, byte plugin, byte Par1, byte Par2, byte
   {
     if (systemTimers[x].timer != 0)
     {
-      if ((systemTimers[x].plugin == plugin) && (systemTimers[x].Par1 == Par1))
+      if ((systemTimers[x].plugin == plugin) && systemTimers[x].TaskIndex == taskIndex && (systemTimers[x].Par1 == Par1))
       {
         systemTimers[x].timer = millis() + timer;
         reUse = true;
@@ -783,13 +798,15 @@ void setSystemTimer(unsigned long timer, byte plugin, byte Par1, byte Par2, byte
     {
       systemTimers[firstAvailable].timer = millis() + timer;
       systemTimers[firstAvailable].plugin = plugin;
+      systemTimers[firstAvailable].TaskIndex = taskIndex;
       systemTimers[firstAvailable].Par1 = Par1;
       systemTimers[firstAvailable].Par2 = Par2;
       systemTimers[firstAvailable].Par3 = Par3;
+      systemTimers[firstAvailable].Par4 = Par4;
+      systemTimers[firstAvailable].Par5 = Par5;
     }
   }
 }
-
 
 //EDWIN: this function seems to be unused?
 /*********************************************************************************************\
@@ -818,13 +835,16 @@ void checkSystemTimers()
       if (timeOutReached(systemTimers[x].timer))
       {
         struct EventStruct TempEvent;
+        TempEvent.TaskIndex = systemTimers[x].TaskIndex;
         TempEvent.Par1 = systemTimers[x].Par1;
         TempEvent.Par2 = systemTimers[x].Par2;
         TempEvent.Par3 = systemTimers[x].Par3;
+        TempEvent.Par3 = systemTimers[x].Par4;
+        TempEvent.Par3 = systemTimers[x].Par5;
+        systemTimers[x].timer = 0;
         for (byte y = 0; y < PLUGIN_MAX; y++)
           if (Plugin_id[y] == systemTimers[x].plugin)
             Plugin_ptr[y](PLUGIN_TIMER_IN, &TempEvent, dummyString);
-        systemTimers[x].timer = 0;
       }
     }
 
