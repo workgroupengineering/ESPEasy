@@ -40,6 +40,9 @@ before_deploy:
   - ./before_deploy
   - export RELEASE_FILE=$(ls ESPEasy*.zip)
 
+after_success:
+    - bash <(curl -s https://codecov.io/bash)
+
 deploy:
   provider: releases
   prerelease: true
