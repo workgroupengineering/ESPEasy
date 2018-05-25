@@ -11,15 +11,16 @@
 #define SECS_PER_YEAR (SECS_PER_WEEK * 52UL)
 #define SECS_YR_2000  (946684800UL) // the time at the start of y2k
 #define LEAP_YEAR(Y)     ( ((1970+Y)>0) && !((1970+Y)%4) && ( ((1970+Y)%100) || !((1970+Y)%400) ) )
+#include <time.h>
 
-timeStruct tm;
+struct tm tm;
 uint32_t syncInterval = 3600;  // time sync will be attempted after this many seconds
 uint32_t sysTime = 0;
 uint32_t prevMillis = 0;
 uint32_t nextSyncTime = 0;
-timeStruct tsRise, tsSet;
-timeStruct sunRise;
-timeStruct sunSet;
+struct tm tsRise, tsSet;
+struct tm sunRise;
+struct tm sunSet;
 
 byte PrevMinutes = 0;
 
@@ -57,43 +58,44 @@ int dayOfYear(int year, int month, int day) {
 }
 
 void calcSunRiseAndSet() {
-	int doy = dayOfYear(tm.Year, tm.Month, tm.Day);
+	int doy = dayOfYear(tm.tm_year, tm.tm_mon, tm.tm_mday);
 	float eqt = equationOfTime(doy);
 	float dec = sunDeclination(doy);
 	float da = diurnalArc(dec, Settings.Latitude);
 	float rise = 12 - da - eqt - Settings.Longitude / 15.0;
 	float set = 12 + da - eqt - Settings.Longitude / 15.0;
-  tsRise.Hour = (int)rise;
-  tsRise.Minute = (rise - (int)rise) * 60.0;
-  tsSet.Hour = (int)set;
-  tsSet.Minute = (set - (int)set) * 60.0;
-  tsRise.Day = tsSet.Day = tm.Day;
-  tsRise.Month = tsSet.Month = tm.Month;
-  tsRise.Year = tsSet.Year = tm.Year;
+  tsRise.tm_hour = (int)rise;
+  tsRise.tm_min = (rise - (int)rise) * 60.0;
+  tsSet.tm_hour = (int)set;
+  tsSet.tm_min = (set - (int)set) * 60.0;
+  tsRise.tm_mday = tsSet.tm_mday = tm.tm_mday;
+  tsRise.tm_mon = tsSet.tm_mon = tm.tm_mon;
+  tsRise.tm_year = tsSet.tm_year = tm.tm_year;
   breakTime(toLocal(makeTime(tsRise)), sunRise);
   breakTime(toLocal(makeTime(tsSet)), sunSet);
 }
 
-timeStruct getSunRise(int secOffset) {
+
+struct tm getSunRise(int secOffset) {
 	return addSeconds(tsRise, secOffset, true);
 }
 
-timeStruct getSunSet(int secOffset) {
+struct tm getSunSet(int secOffset) {
 	return addSeconds(tsSet, secOffset, true);
 }
 
-timeStruct addSeconds(const timeStruct& ts, int seconds, bool toLocalTime) {
+struct tm addSeconds(const struct tm& ts, int seconds, bool toLocalTime) {
 	unsigned long time = makeTime(ts);
 	time += seconds;
 	if (toLocalTime) {
 		time = toLocal(time);
 	}
-	timeStruct result;
+	struct tm result;
 	breakTime(time, result);
 	return result;
 }
 
-void breakTime(unsigned long timeInput, struct timeStruct &tm) {
+void breakTime(unsigned long timeInput, struct tm &tm) {
   uint8_t year;
   uint8_t month, monthLength;
   uint32_t time;
@@ -101,20 +103,20 @@ void breakTime(unsigned long timeInput, struct timeStruct &tm) {
   const uint8_t monthDays[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
   time = (uint32_t)timeInput;
-  tm.Second = time % 60;
+  tm.tm_sec = time % 60;
   time /= 60; // now it is minutes
-  tm.Minute = time % 60;
+  tm.tm_min = time % 60;
   time /= 60; // now it is hours
-  tm.Hour = time % 24;
+  tm.tm_hour = time % 24;
   time /= 24; // now it is days
-  tm.Wday = ((time + 4) % 7) + 1;  // Sunday is day 1
+  tm.tm_wday = ((time + 4) % 7) + 1;  // Sunday is day 1
 
   year = 0;
   days = 0;
   while ((unsigned)(days += (LEAP_YEAR(year) ? 366 : 365)) <= time) {
     year++;
   }
-  tm.Year = year; // year is offset from 1970
+  tm.tm_year = year; // year is offset from 1970
 
   days -= LEAP_YEAR(year) ? 366 : 365;
   time  -= days; // now it is days in this year, starting at 0
@@ -139,8 +141,8 @@ void breakTime(unsigned long timeInput, struct timeStruct &tm) {
       break;
     }
   }
-  tm.Month = month + 1;  // jan is month 1
-  tm.Day = time + 1;     // day of month
+  tm.tm_mon = month + 1;  // jan is month 1
+  tm.tm_mday = time + 1;     // day of month
 }
 
 void setTime(unsigned long t) {
@@ -230,53 +232,53 @@ unsigned long now() {
 }
 
 int year(unsigned long t) {
-  timeStruct tmp;
+  struct tm tmp;
   breakTime(t, tmp);
-  return 1970 + tmp.Year;
+  return 1970 + tmp.tm_year;
 }
 
 int weekday(unsigned long t) {
-  timeStruct tmp;
+  struct tm tmp;
   breakTime(t, tmp);
-  return tmp.Wday;
+  return tmp.tm_wday;
 }
 
 
 
 int year()
 {
-  return 1970 + tm.Year;
+  return 1970 + tm.tm_year;
 }
 
 byte month()
 {
-	return tm.Month;
+	return tm.tm_mon;
 }
 
 byte day()
 {
-	return tm.Day;
+	return tm.tm_mday;
 }
 
 byte hour()
 {
-  return tm.Hour;
+  return tm.tm_hour;
 }
 
 byte minute()
 {
-  return tm.Minute;
+  return tm.tm_min;
 }
 
 byte second()
 {
-	return tm.Second;
+	return tm.tm_sec;
 }
 
 // day of week, sunday is day 1
 int weekday()
 {
-  return tm.Wday;
+  return tm.tm_wday;
 }
 
 String weekday_str()
@@ -295,10 +297,10 @@ void initTime()
 void checkTime()
 {
   now();
-  if (tm.Minute != PrevMinutes)
+  if (tm.tm_min != PrevMinutes)
   {
     PluginCall(PLUGIN_CLOCK_IN, 0, dummyString);
-    PrevMinutes = tm.Minute;
+    PrevMinutes = tm.tm_min;
     if (Settings.UseRules)
     {
       String event;
@@ -532,10 +534,10 @@ String timeLong2String(unsigned long lngTime)
 
 // returns the current Date separated by the given delimiter
 // date format example with '-' delimiter: 2016-12-31 (YYYY-MM-DD)
-String getDateString(const timeStruct& ts, char delimiter) {
+String getDateString(const struct tm& ts, char delimiter) {
   char DateString[20]; //19 digits plus the null char
-  const int year = 1970 + ts.Year;
-  sprintf_P(DateString, PSTR("%4d%c%02d%c%02d"), year, delimiter, ts.Month, delimiter, ts.Day);
+  const int year = 1970 + ts.tm_year;
+  sprintf_P(DateString, PSTR("%4d%c%02d%c%02d"), year, delimiter, ts.tm_mon, delimiter, ts.tm_mday);
   return DateString;
 }
 
@@ -553,27 +555,27 @@ String getDateString()
 
 // returns the current Time separated by the given delimiter
 // time format example with ':' delimiter: 23:59:59 (HH:MM:SS)
-String getTimeString(const timeStruct& ts, char delimiter, bool am_pm, bool show_seconds)
+String getTimeString(const struct tm& ts, char delimiter, bool am_pm, bool show_seconds)
 {
   char TimeString[20]; //19 digits plus the null char
   if (am_pm) {
-    uint8_t hour(ts.Hour % 12);
+    uint8_t hour(ts.tm_hour % 12);
     if (hour == 0) { hour = 12; }
-    const char a_or_p = ts.Hour < 12 ? 'A' : 'P';
+    const char a_or_p = ts.tm_hour < 12 ? 'A' : 'P';
     if (show_seconds) {
       sprintf_P(TimeString, PSTR("%d%c%02d%c%02d %cM"),
-        hour, delimiter, ts.Minute, delimiter, ts.Second, a_or_p);
+        hour, delimiter, ts.tm_min, delimiter, ts.tm_sec, a_or_p);
     } else {
       sprintf_P(TimeString, PSTR("%d%c%02d %cM"),
-        hour, delimiter, ts.Minute, a_or_p);
+        hour, delimiter, ts.tm_min, a_or_p);
     }
   } else {
     if (show_seconds) {
       sprintf_P(TimeString, PSTR("%02d%c%02d%c%02d"),
-        ts.Hour, delimiter, ts.Minute, delimiter, ts.Second);
+        ts.tm_hour, delimiter, ts.tm_min, delimiter, ts.tm_sec);
     } else {
       sprintf_P(TimeString, PSTR("%d%c%02d"),
-        ts.Hour, delimiter, ts.Minute);
+        ts.tm_hour, delimiter, ts.tm_min);
     }
   }
   return TimeString;
@@ -604,7 +606,7 @@ String getTimeString_ampm()
 // returns the current Date and Time separated by the given delimiter
 // if called like this: getDateTimeString('\0', '\0', '\0');
 // it will give back this: 20161231235959  (YYYYMMDDHHMMSS)
-String getDateTimeString(const timeStruct& ts, char dateDelimiter, char timeDelimiter,  char dateTimeDelimiter, bool am_pm)
+String getDateTimeString(const struct tm& ts, char dateDelimiter, char timeDelimiter,  char dateTimeDelimiter, bool am_pm)
 {
 	String ret = getDateString(ts, dateDelimiter);
 	if (dateTimeDelimiter != '\0')
