@@ -1,6 +1,8 @@
 #ifndef SPIFFS_CHECK
  #define SPIFFS_CHECK(result, fname) if (!(result)) { return(FileError(__LINE__, fname)); }
 #endif
+#define FOREACH_VARIADIC(EXPR) (int[]){((void)(EXPR),0)...,0}
+#include <algorithm>
 
 /********************************************************************************************\
   Init critical variables for logging (important during initial factory reset stuff )
@@ -299,3 +301,43 @@ String Debug_Scopes_Save()
   return err;
 }
 
+/********************************************************************************************\
+  Scope Logging
+ **************************/
+
+template<typename... Args>
+bool loglevelActiveFor(byte logLevel, Args... args) {
+  boolean active = loglevelActive(logLevel, highest_active_log_level);
+  size_t argNumbers = sizeof ...(args);
+  if(active && argNumbers > 0)
+  {
+    int result = 0;
+    FOREACH_VARIADIC(CheckScope(result,std::forward<Args>(args)));
+    active = result > 0;
+  }
+  return active;
+}
+
+template<typename... Args>
+boolean loglevelActiveFor(byte destination, byte logLevel, Args... args) {
+  boolean active = loglevelActiveFor(destination, logLevel);
+  size_t argNumbers = sizeof ...(args);
+  if(active && argNumbers > 0)
+  {
+    int result = 0;
+    FOREACH_VARIADIC(CheckScope(result,std::forward<Args>(args)));
+    active = result > 0;
+  }
+  return active;
+}
+
+template<typename Param>
+void CheckScope(int& result, Param p)
+{
+  String scope = String(p);
+  bool exist = std::any_of(std::begin(activeDebugScopes)
+    , std::end(activeDebugScopes)
+    , [&](String i) { return i == scope; });
+  if(exist)
+    result++;
+}

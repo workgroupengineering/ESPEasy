@@ -1376,7 +1376,7 @@ byte highest_active_log_level = 0;
 bool log_to_serial_disabled = false;
 bool log_to_serial_disabled_temporary = false;
 // Do this in a template to prevent casting to String when not needed.
-#define addLog(L,S) if (loglevelActiveFor(L)) { addToLog(L,S); }
+#define addLog(L,S,...) if (loglevelActiveFor(L, ##__VA_ARGS__)) { addToLog(L,S); }
 
 /*********************************************************************************************\
  * DeviceStruct
