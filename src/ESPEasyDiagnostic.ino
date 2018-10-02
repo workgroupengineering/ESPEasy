@@ -1,3 +1,7 @@
+#ifndef SPIFFS_CHECK
+ #define SPIFFS_CHECK(result, fname) if (!(result)) { return(FileError(__LINE__, fname)); }
+#endif
+
 /********************************************************************************************\
   Init critical variables for logging (important during initial factory reset stuff )
   \*********************************************************************************************/
@@ -248,5 +252,50 @@ bool serialLogActiveRead() {
     return false;
   }
   return true;
+}
+
+String Debug_Scopes_Load()
+{
+  checkRAM(F("Debug_Scopes_Load"));
+  String err;
+
+  if(activeDebugScopes.empty() == false){
+    activeDebugScopes.clear();
+  }
+
+  auto fname = (char*)FILE_SCOPES;
+
+  fs::File f = SPIFFS.open(fname, "r+");
+  SPIFFS_CHECK(f, fname);
+
+
+  while(f.available()) {
+    //Lets read line by line from the file
+    String line = f.readStringUntil('\n');
+    activeDebugScopes.push_back(line);
+  }
+
+  f.close();
+
+  return err;
+}
+
+String Debug_Scopes_Save()
+{
+  checkRAM(F("Debug_Scopes_Save"));
+  String err;
+
+  auto fname = (char*)FILE_SCOPES;
+  fs::File f = SPIFFS.open(fname, "w+");
+
+  if(activeDebugScopes.empty() == false) {
+    //Lets read line by line from the file
+    for (auto scope : activeDebugScopes){
+      f.println(scope);
+    }
+  }
+  f.close();
+
+  return err;
 }
 

@@ -480,6 +480,7 @@ bool showSettingsFileLayout = false;
   #define FILE_SECURITY     "security.dat"
   #define FILE_NOTIFICATION "notification.dat"
   #define FILE_RULES        "rules1.txt"
+  #define FILE_SCOPES       "scopes.txt"
   #include <lwip/init.h>
   #ifndef LWIP_VERSION_MAJOR
     #error
@@ -536,6 +537,7 @@ bool showSettingsFileLayout = false;
   #define FILE_SECURITY     "/security.dat"
   #define FILE_NOTIFICATION "/notification.dat"
   #define FILE_RULES        "/rules1.txt"
+  #define FILE_SCOPES       "/scopes.txt"
   #include <WiFi.h>
   #include  "esp32_ping.h"
   #include <WebServer.h>
@@ -1931,4 +1933,5 @@ String getMiscStatsName(int stat) {
 #include "ESPEasyWiFiEvent.h"
 
 
+std::vector<String> activeDebugScopes;
 #endif /* ESPEASY_GLOBALS_H_ */

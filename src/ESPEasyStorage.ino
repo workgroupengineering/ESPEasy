@@ -184,6 +184,9 @@ String SaveSettings(void)
       wifiSetupConnect = true;
     }
   }
+  if (err.length() == 0) {
+    err = Debug_Scopes_Save();
+  }
   return (err);
 }
 
@@ -235,6 +238,9 @@ String LoadSettings()
   }
   setUseStaticIP(useStaticIP());
   ExtraTaskSettings.clear(); // make sure these will not contain old settings.
+  if (err.length() == 0) {
+    err = Debug_Scopes_Load();
+  }
   return(err);
 }
 
