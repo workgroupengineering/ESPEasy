@@ -4032,11 +4032,14 @@ void handle_advanced() {
     Settings.Latitude = getFormItemFloat(F("latitude"));
     Settings.Longitude = getFormItemFloat(F("longitude"));
 
+    Debug_Scopes_Render_Post();
+
     addHtmlError(SaveSettings());
     if (Settings.UseNTP)
       initTime();
   }
 
+  Debug_Scopes_Render_Scripts();
   // char str[20];
 
   TXBuffer += F("<form  method='post'><table class='normal'>");
@@ -4077,7 +4080,7 @@ void handle_advanced() {
   addFormLogFacilitySelect(F("Syslog Facility"),F("syslogfacility"), Settings.SyslogFacility);
   addFormLogLevelSelect(F("Serial log Level"),  F("serialloglevel"), Settings.SerialLogLevel);
   addFormLogLevelSelect(F("Web log Level"),     F("webloglevel"),    Settings.WebLogLevel);
-
+  Debug_Scopes_Render();
 #ifdef FEATURE_SD
   addFormLogLevelSelect(F("SD Card log Level"), F("sdloglevel"),     Settings.SDLogLevel);
 
